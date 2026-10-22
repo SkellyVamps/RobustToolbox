@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using Robust.Client.Audio.Realtime;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.AudioLoading;
 using Robust.Shared.Audio.Sources;
@@ -12,8 +13,18 @@ namespace Robust.Client.Audio;
 /// <summary>
 /// Headless client audio.
 /// </summary>
-internal sealed class HeadlessAudioManager : IAudioInternal
+internal sealed class HeadlessAudioManager : IAudioInternal, IRealtimeAudioManager
 {
+    public bool CaptureSupported => false;
+
+    public IReadOnlyList<string> GetCaptureDevices() => Array.Empty<string>();
+
+    public string? GetDefaultCaptureDevice() => null;
+
+    public IAudioCaptureDevice? OpenCaptureDevice(string? deviceName, int sampleRate, int bufferSamples) => null;
+
+    public IStreamingAudioSource? CreateStreamingSource(int sampleRate, int maxQueuedChunks = 16) => null;
+
 
     private readonly IReadOnlyList<string> _emptyDevices = Array.Empty<string>();
     private int _audioBuffer;

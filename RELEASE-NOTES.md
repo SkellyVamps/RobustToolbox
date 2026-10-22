@@ -14,7 +14,8 @@ Don't change the format without looking at the script!
 
 ### New features
 
-*None yet*
+* Added `IRealtimeAudioManager` for real-time audio: microphone capture (`OpenCaptureDevice`, `IAudioCaptureDevice`) and streaming PCM playback (`CreateStreamingSource`, `IStreamingAudioSource`).
+* Added a managed Opus voice codec (`OpusVoiceEncoder`, `OpusVoiceDecoder`, `OpusPacket`) in `Robust.Shared.Audio.Codecs`, backed by Concentus (BSD-3-Clause).
 
 ### Bugfixes
 

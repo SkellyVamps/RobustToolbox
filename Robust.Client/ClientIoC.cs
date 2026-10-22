@@ -1,4 +1,5 @@
 using Robust.Client.Audio;
+using Robust.Client.Audio.Realtime;
 using Robust.Client.Audio.Midi;
 using Robust.Client.Configuration;
 using Robust.Client.Console;
@@ -120,6 +121,7 @@ namespace Robust.Client
                     deps.Register<IClydeInternal, ClydeHeadless>();
                     deps.Register<IAudioManager, HeadlessAudioManager>();
                     deps.Register<IAudioInternal, HeadlessAudioManager>();
+                    deps.Register<IRealtimeAudioManager, HeadlessAudioManager>();
                     deps.Register<IInputManager, InputManager>();
                     deps.Register<IUriOpener, UriOpenerDummy>();
                     deps.Register<ISystemFontManager, SystemFontManagerFallback>();
@@ -131,6 +133,7 @@ namespace Robust.Client
                     deps.Register<IClydeInternal, Clyde>();
                     deps.Register<IAudioManager, AudioManager>();
                     deps.Register<IAudioInternal, AudioManager>();
+                    deps.Register<IRealtimeAudioManager, AudioManager>();
                     deps.Register<IInputManager, ClydeInputManager>();
                     deps.Register<IUriOpener, UriOpener>();
                     deps.Register<ISystemFontManager, SystemFontManager>();
