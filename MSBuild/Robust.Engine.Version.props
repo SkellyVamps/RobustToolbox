@@ -1,4 +1,5 @@
 <Project>
     <!-- This file automatically reset by Tools/version.py -->
-    <PropertyGroup><Version>293.0.1</Version></PropertyGroup>
+    <!-- Fork versions use a 4th component (voice build number) so they never collide with official engine versions. -->
+    <PropertyGroup><Version>293.0.1.1</Version></PropertyGroup>
 </Project>

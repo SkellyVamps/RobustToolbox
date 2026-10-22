@@ -1,0 +1,81 @@
+name: Publish Fork Engine Build
+
+# Push a tag like v293.0.1.1 to build, sign and publish an engine build for the voice chat launcher.
+# Requires the ENGINE_SIGNING_KEY secret (Ed25519 private key, PEM). See docs in the content repo:
+# docs/voice/server-owners.md.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Engine version to publish (must match MSBuild/Robust.Engine.Version.props)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4.2.2
+        with:
+          submodules: true
+
+      - name: Check version matches the engine
+        shell: bash
+        run: |
+          grep -q "<Version>${{ steps.version.outputs.version }}</Version>" MSBuild/Robust.Engine.Version.props || {
+            echo "Tag version doesn't match MSBuild/Robust.Engine.Version.props"; exit 1; }
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.1.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Package client
+        run: Tools/package_client_build.py
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Engine ${{ steps.version.outputs.version }}
+          files: release/Robust.Client_*.zip
+
+      - name: Sign builds and update manifest
+        env:
+          ENGINE_SIGNING_KEY: ${{ secrets.ENGINE_SIGNING_KEY }}
+        shell: bash
+        run: |
+          pip install cryptography==43.0.1
+          git fetch origin robust-builds || true
+          mkdir -p manifest-branch
+          if git show-ref --quiet refs/remotes/origin/robust-builds; then
+            git worktree add manifest-branch origin/robust-builds
+          else
+            git worktree add --detach manifest-branch
+            (cd manifest-branch && git checkout --orphan robust-builds && git rm -rf --quiet . || true)
+          fi
+          Tools/sign_engine_build.py "${{ steps.version.outputs.version }}" release \
+            "https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}" \
+            manifest-branch/manifest.json
+          cd manifest-branch
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "Engine build ${{ steps.version.outputs.version }}"
+          git push origin HEAD:robust-builds

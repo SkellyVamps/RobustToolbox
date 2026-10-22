@@ -1,9 +1,9 @@
 ﻿name: Publish Client Build
 
+# Upstream's publishing pipeline (needs Space Wizards' infrastructure secrets).
+# This fork publishes with publish-fork-build.yml instead.
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 jobs:
   build:
