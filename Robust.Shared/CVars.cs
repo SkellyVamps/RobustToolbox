@@ -790,7 +790,11 @@ namespace Robust.Shared
         /// </summary>
         public static readonly CVarDef<string> BuildEngineVersion =
             CVarDef.Create("build.engine_version",
-                typeof(CVars).Assembly.GetName().Version?.ToString(3) ?? String.Empty);
+                // Fork builds use a 4th version component, which must not be dropped or the launcher fetches the
+                // official engine of the same 3-part version.
+                typeof(CVars).Assembly.GetName().Version is { } engineVersion
+                    ? engineVersion.ToString(engineVersion.Revision > 0 ? 4 : 3)
+                    : String.Empty);
 
         /// <summary>
         /// Fork ID, as a hint to the launcher to manage local files.
